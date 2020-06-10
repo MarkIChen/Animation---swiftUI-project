@@ -8,23 +8,46 @@
 
 import SwiftUI
 
+struct CornerRotateModifier: ViewModifier {
+    let amount: Double
+    let anchor: UnitPoint
+    
+    func body(content: Content) -> some View {
+        content.rotationEffect(.degrees(amount), anchor: anchor).clipped()
+    }
+}
+
+extension AnyTransition {
+    static var pivot: AnyTransition {
+        .modifier(active: CornerRotateModifier(amount: -90, anchor: .topLeading)
+            , identity: CornerRotateModifier(amount: 0, anchor: .topLeading))
+    }
+}
+
+
 struct ContentView: View {
-    @State private var dragAmount = CGSize.zero
+    @State private var showRec = false
+    
     
     var body: some View {
-        LinearGradient(gradient: Gradient(colors: [.yellow, .orange]), startPoint: .topTrailing, endPoint: .bottomTrailing)
-            .frame(width: 300, height: 200, alignment: .center)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .offset(dragAmount)
-            .gesture(DragGesture()
-                .onChanged {self.dragAmount = $0.translation}
-                .onEnded {_ in
-                    withAnimation(.easeOut) {
-                        self.dragAmount = CGSize.zero
-                    }
-            })
-        
-        
+        VStack {
+            Button("Tap me") {
+                withAnimation {
+                    self.showRec.toggle()
+                }
+            }
+            
+            if showRec {
+                
+                Rectangle()
+                    .frame(width: 200, height: 200, alignment: .center)
+                   
+//                    .transition(.asymmetric(insertion: .slide, removal: .opacity))
+                    .transition(.pivot)
+                 .background(LinearGradient(gradient: Gradient(colors: [.red, .yellow]), startPoint: .topLeading, endPoint: .bottomLeading))
+            }
+            
+        }
     }
 }
 
